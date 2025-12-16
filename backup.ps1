@@ -74,10 +74,10 @@ function Test-VSSSupport {
     Param($test_path)
 
     $drive_letter = Split-Path $test_path -Qualifier
-    $volume = Get-WmiObject -Query "SELECT * FROM Win32_Volume WHERE DriveLetter = '$drive_letter'" 
+    $volume = Get-CimInstance -Query "SELECT * FROM Win32_Volume WHERE DriveLetter = '$drive_letter'" 
     $deviceID = ($volume.DeviceID -replace '.*(\{.*\}).*', '$1')
     ### https://learn.microsoft.com/en-us/previous-versions/windows/desktop/vsswmi/win32-shadowvolumesupport
-    $supportedVolumes = Get-WmiObject -Query "SELECT * FROM Win32_ShadowVolumeSupport WHERE __PATH LIKE '%$deviceID%'"
+    $supportedVolumes = Get-CimInstance -Query "SELECT * FROM Win32_ShadowVolumeSupport WHERE __PATH LIKE '%$deviceID%'"
 
     return ($null -ne $supportedVolumes)
 }
@@ -434,7 +434,7 @@ function Invoke-ConnectivityCheck {
     }
 
     # skip the internet connectivity check for local repos
-    if(Test-Path $env:RESTIC_REPOSITORY) {
+    if(Test-Path "$env:RESTIC_REPOSITORY") {
         "[[Internet]] Local repository. Skipping internet connectivity check." | Out-File -Append $SuccessLog
         return $true
     }
